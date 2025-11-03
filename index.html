@@ -116,6 +116,39 @@
       opacity:1;
     }
     .title{flex:1;color:var(--text);font-weight:600}
+
+    /* Animated name styling */
+    .animated-name{
+      display:inline-block;
+      font-weight:700;
+      background: linear-gradient(90deg, var(--orange), #ffd28a 40%, var(--blue));
+      background-size: 200% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      transform-origin: center;
+      transition: transform .22s ease, opacity .22s ease;
+      animation: nameShimmer 3.6s linear infinite, nameFloat 6s ease-in-out infinite;
+    }
+
+    @keyframes nameShimmer{
+      0%{ background-position: 0% 50%; }
+      50%{ background-position: 100% 50%; }
+      100%{ background-position: 0% 50%; }
+    }
+
+    @keyframes nameFloat{
+      0%{ transform: translateY(0); }
+      50%{ transform: translateY(-3px); }
+      100%{ transform: translateY(0); }
+    }
+
+    .animated-name:hover{ transform: translateY(-6px) scale(1.03); }
+
+    /* Respect user preference for reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      .animated-name{ animation: none; transition: none; }
+    }
     .top-actions{display:flex;gap:10px;align-items:center}
     .btn{
       background:var(--glass);
@@ -186,14 +219,16 @@
     }
     .link-overlay a{
       position:absolute;
-      border:2px dashed rgba(255,122,45,0.9);
+      /* keep clickable area but hide visible rectangle */
+      border: none;
       border-radius:6px;
-      box-shadow:0 6px 18px rgba(255,122,45,0.08);
-      background: linear-gradient(90deg, rgba(255,122,45,0.06), rgba(43,69,160,0.02));
+      box-shadow: none;
+      background: transparent;
       pointer-events:auto;
-      transition:transform .12s, box-shadow .12s;
+      transition: transform .12s;
     }
-    .link-overlay a:hover{transform:scale(1.02); box-shadow:0 10px 30px rgba(0,0,0,0.12)}
+    /* keep subtle feedback on hover without showing a rectangle */
+    .link-overlay a:hover{transform:scale(1.02)}
 
     /* Footer/pagination inside each page */
     .page-footer{
@@ -248,7 +283,7 @@
       </span>
       <span>Blondin Office</span>
     </div>
-    <div class="title">Portfolio — Ousmane Blondin Diop</div>
+  <div class="title">Portfolio — <span class="animated-name">Ousmane Blondin Diop</span></div>
     <div class="top-actions">
       <button class="btn" id="toTop">Haut de page</button>
       <button class="btn primary" id="exportPdf">Exporter en PDF</button>
