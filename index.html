@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Portfolio — Blondin Office</title>
+
+  <!-- Inter font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --blue:#2b45a0;
+      --orange:#ff7a2d;
+      --bg1:#0f1b4a;
+      --bg2:#162564;
+      --text:#e9eefc;
+      --glass: rgba(255,255,255,0.04);
+      --page-shadow: 0 10px 30px rgba(6,10,35,0.45);
+    }
+
+    /* Basic reset */
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:"Inter", Helvetica, Arial, sans-serif;
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      background: linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 60%);
+      overflow-x:hidden;
+      transition: background-position 0.2s linear;
+      position:relative;
+    }
+
+    /* Subtle parallax layer */
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      background:
+        radial-gradient(800px 400px at 10% 10%, rgba(43,69,160,0.12), transparent 10%),
+        radial-gradient(600px 300px at 90% 90%, rgba(255,122,45,0.06), transparent 10%);
+      pointer-events:none;
+      mix-blend-mode:overlay;
+      opacity:0.9;
+      transform:translateZ(0);
+      transition:transform .2s linear;
+    }
+
+    /* Top bar */
+    header.topbar{
+      position:fixed;
+      left:0; right:0;
+      top:0;
+      height:64px;
+      display:flex;
+      align-items:center;
+      gap:16px;
+      padding:0 20px;
+      z-index:40;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      backdrop-filter: blur(6px);
+      border-bottom:1px solid rgba(255,255,255,0.03);
+    }
+    .logo{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight:700;
+      color:var(--text);
+      font-size:16px;
+    }
+    .logo .mark{
+      width:34px;height:34px;border-radius:8px;
+      box-shadow:0 4px 18px rgba(43,69,160,0.35), inset 0 -6px 20px rgba(255,255,255,0.06);
+      display:inline-flex;align-items:center;justify-content:center;
+      position:relative;overflow:visible;
+      /* 3D context for flip */
+      perspective: 600px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* decorative circular gradient behind the square */
+    .logo .mark::before{
+      content:"";
+      position:absolute;
+      left:50%;top:50%;
+      width:140%;height:140%;
+      transform:translate(-50%,-50%);
+      border-radius:50%;
+      z-index:0;
+      background: radial-gradient(circle at 30% 30%, rgba(255,122,45,0.16), rgba(43,69,160,0.10) 40%, transparent 60%);
+      filter: blur(6px);
+      transition: transform .28s ease, opacity .28s ease;
+      opacity:0.95;
+      pointer-events:none;
+    }
+
+    .logo .mark .logo-img{
+      width:26px;height:26px;display:block;object-fit:contain;z-index:2;backface-visibility:hidden;
+      transform-style:preserve-3d;transition: transform .6s cubic-bezier(.2,.9,.3,1);
+    }
+
+    /* flip on hover (pointer devices) or when .flipped is added */
+    .logo .mark:hover .logo-img,
+    .logo .mark.flipped .logo-img{
+      transform: rotateY(180deg) scale(1.02);
+    }
+
+    /* slightly scale and lift the circular background on hover */
+    .logo .mark:hover::before,
+    .logo .mark.flipped::before{
+      transform: translate(-50%,-50%) scale(1.06);
+      opacity:1;
+    }
+    .title{flex:1;color:var(--text);font-weight:600}
+    .top-actions{display:flex;gap:10px;align-items:center}
+    .btn{
+      background:var(--glass);
+      color:var(--text);
+      border:1px solid rgba(255,255,255,0.04);
+      padding:8px 12px;border-radius:8px;
+      font-size:14px;cursor:pointer;
+      transition:transform .12s ease, box-shadow .12s ease, background .12s;
+    }
+    .btn:hover{transform:translateY(-2px)}
+    .btn.primary{
+      background:linear-gradient(90deg,var(--blue),var(--orange));
+      color:white;border:none;
+      box-shadow:0 6px 20px rgba(43,69,160,0.25);
+    }
+
+    main.content{
+      padding:96px 20px 10px;
+      max-width:1200px;
+      margin:0 auto;
+    }
+
+    .page-wrap{
+      display:flex;
+      justify-content:center;
+      margin-bottom:42px;
+    }
+
+    /* A4 landscape aspect */
+    .page{
+      width:min(980px, 92vw);
+      aspect-ratio: 297 / 210; /* A4 landscape */
+      background: #fff;
+      border-radius:6px;
+      overflow:hidden;
+      position:relative;
+      box-shadow: var(--page-shadow);
+      transition: transform .35s cubic-bezier(.2,.9,.2,1), box-shadow .25s linear, opacity .4s;
+      transform-origin:center;
+      opacity:0;
+      transform: translateY(24px) scale(0.998);
+      display:flex;
+      flex-direction:column;
+    }
+
+    .page.in-view{opacity:1; transform: translateY(0) scale(1)}
+
+    /* Image area fills page */
+    .page .img{
+      flex:1;
+      background: #f2f3f7 url('') center/contain no-repeat;
+      display:block;
+      position:relative;
+      transition: transform .45s cubic-bezier(.2,.9,.2,1), box-shadow .3s;
+    }
+    .page .img img{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      display:block;
+    }
+
+    /* Overlay for clickable links (optional) */
+    .link-overlay{
+      position:absolute;
+      top:0;left:0;right:0;bottom:48px; /* leave space for footer */
+      pointer-events:none;
+    }
+    .link-overlay a{
+      position:absolute;
+      border:2px dashed rgba(255,122,45,0.9);
+      border-radius:6px;
+      box-shadow:0 6px 18px rgba(255,122,45,0.08);
+      background: linear-gradient(90deg, rgba(255,122,45,0.06), rgba(43,69,160,0.02));
+      pointer-events:auto;
+      transition:transform .12s, box-shadow .12s;
+    }
+    .link-overlay a:hover{transform:scale(1.02); box-shadow:0 10px 30px rgba(0,0,0,0.12)}
+
+    /* Footer/pagination inside each page */
+    .page-footer{
+      height:48px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 14px;
+      background:linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.03));
+      font-size:13px;color:#26314a;
+      gap:12px;
+    }
+    .page-footer .left{font-weight:600;color:var(--blue)}
+    .page-footer .right{margin-left:auto;color:#5b6a92;font-weight:600}
+
+    /* Hover zoom and stronger shadow on pointer devices */
+    @media (hover:hover){
+      .page:hover{
+        transform:scale(1.012);
+        box-shadow: 0 20px 50px rgba(6,10,35,0.6);
+      }
+      .page .img:hover{transform: scale(1.01)}
+    }
+
+    /* Mobile adjustments */
+    @media (max-width:640px){
+      header.topbar{height:72px;padding:10px}
+      .title{display:none}
+      .page{width:100%; aspect-ratio: 297 / 210}
+      .page-wrap{margin-bottom:28px}
+      .page-footer{font-size:12px}
+    }
+
+    /* Print rules for A4 landscape export */
+    @media print{
+      @page { size: A4 landscape; margin: 6mm; }
+      body{background: white}
+      header.topbar, .btn{display:none !important}
+      main.content{padding:0;max-width:initial}
+      .page{width:100%; aspect-ratio: 297 / 210; box-shadow:none; border-radius:0; break-after:page; page-break-after:always}
+      .page .img img{width:100%;height:100%;object-fit:cover}
+      .page-footer{color:#111;background:transparent;border-top:1px solid #ddd}
+      .link-overlay{display:none}
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar" role="banner">
+    <div class="logo" aria-hidden="true">
+      <span class="mark" role="button" tabindex="0" aria-pressed="false">
+        <img class="logo-img" src="logo.svg" alt="Blondin Office logo">
+      </span>
+      <span>Blondin Office</span>
+    </div>
+    <div class="title">Portfolio — Ousmane Blondin Diop</div>
+    <div class="top-actions">
+      <button class="btn" id="toTop">Haut de page</button>
+      <button class="btn primary" id="exportPdf">Exporter en PDF</button>
+    </div>
+  </header>
+
+  <main class="content" id="content" role="main">
+    <!-- Pages will be injected here -->
+  </main>
+
+  <script>
+    // Pages array: can be simple strings or objects with links.
+    // Example with clickable links:
+    // { src: 'page2.jpg', links: [ {x:10, y:10, w:30, h:20, url:'https://youtu.be/...'} ] }
+    // Coordinates are percentages relative to page (0-100).
+    const pages = [
+      'PORFOLIO 2025_Plan de travail 1.jpg',
+      { src: 'PORFOLIO 2025-02.jpg', links: [
+          { x: 70, y: 10, w: 24, h: 10, url: 'https://www.instagram.com/blondin_office?igsh=MTBheGJwdTdoZzBzbg%3D%3D&utm_source=qr' }
+        ]
+      },
+      'PORFOLIO 2025-03.jpg', 'PORFOLIO 2025-04.jpg',
+      'PORFOLIO 2025-05.jpg','PORFOLIO 2025-06.jpg',
+      'PORFOLIO 2025-07.jpg',
+      'PORFOLIO 2025-08.jpg','PORFOLIO 2025-09.jpg',
+      'PORFOLIO 2025-10.jpg','PORFOLIO 2025-11.jpg',
+      'PORFOLIO 2025-12.jpg','PORFOLIO 2025-13.jpg',
+      'PORFOLIO 2025-14.jpg','PORFOLIO 2025-15.jpg',
+      'PORFOLIO 2025-16.jpg','PORFOLIO 2025-17.jpg',
+      'PORFOLIO 2025-18.jpg','PORFOLIO 2025-19.jpg',
+      'PORFOLIO 2025-20.jpg','PORFOLIO 2025-21.jpg'
+       // placeholder names — replace with your images
+    ];
+
+    const container = document.getElementById('content');
+
+    function makePageItem(src, index, links){
+      const wrap = document.createElement('div');
+      wrap.className = 'page-wrap';
+
+      const page = document.createElement('article');
+      page.className = 'page';
+      page.setAttribute('data-index', index+1);
+      page.setAttribute('aria-label', 'Page ' + (index+1));
+      page.innerHTML = `
+        <div class="img">
+          <img alt="Page ${index+1}" loading="lazy" src="${src}">
+        </div>
+        <div class="link-overlay"></div>
+        <div class="page-footer">
+          <div class="left">Page ${index+1}</div>
+          <div class="right">Blondin Office • Portfolio</div>
+        </div>
+      `;
+      // If image fails, show simple fallback
+      const imgEl = page.querySelector('img');
+      imgEl.addEventListener('error', ()=> {
+        imgEl.style.display = 'none';
+        const fallback = document.createElement('div');
+        fallback.style.cssText = 'width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#f6f7fb;color:#6b7280;font-weight:600';
+        fallback.textContent = 'Image manquante: ' + src;
+        page.querySelector('.img').appendChild(fallback);
+      });
+
+      // Add clickable links if provided
+      if(Array.isArray(links)){
+        const overlay = page.querySelector('.link-overlay');
+        links.forEach(link=>{
+          const a = document.createElement('a');
+          a.href = link.url;
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          // set position using percentages
+          a.style.left = link.x + '%';
+          a.style.top = link.y + '%';
+          a.style.width = (link.w || 10) + '%';
+          a.style.height = (link.h || 8) + '%';
+          overlay.appendChild(a);
+        });
+      }
+
+      wrap.appendChild(page);
+      return wrap;
+    }
+
+    // Render pages
+    pages.forEach((p,i)=>{
+      if(typeof p === 'string'){
+        container.appendChild(makePageItem(p, i));
+      } else if (p && p.src){
+        container.appendChild(makePageItem(p.src, i, p.links || []));
+      }
+    });
+
+    // IntersectionObserver for fade-in / translateY
+    const observer = new IntersectionObserver((entries)=>{
+      entries.forEach(ent=>{
+        if(ent.isIntersecting){
+          ent.target.classList.add('in-view');
+        } else {
+          // keep visible after first reveal? comment below to keep stable
+          // ent.target.classList.remove('in-view');
+        }
+      });
+    }, {threshold: 0.12});
+    document.querySelectorAll('.page').forEach(p => observer.observe(p));
+
+    // Scroll-to-top
+    document.getElementById('toTop').addEventListener('click', ()=> {
+      window.scrollTo({top:0, behavior:'smooth'});
+    });
+
+    // Exporter / Télécharger le PDF
+    document.getElementById('exportPdf').addEventListener('click', ()=> {
+      // Téléchargement programmatique du fichier PDF local
+      const pdfUrl = 'PORFOLIO 2025.pdf';
+      const a = document.createElement('a');
+      a.href = pdfUrl;
+      // indique au navigateur de télécharger plutôt que d'ouvrir
+      a.setAttribute('download', pdfUrl.split('/').pop());
+      // some browsers require the link to be in the DOM
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    });
+
+    // Parallax subtle background movement
+    const onScroll = () => {
+      const y = window.scrollY || window.pageYOffset;
+      // shift the pseudo-layer slightly
+      document.body.style.backgroundPosition = `center ${-y * 0.07}px`;
+      document.body.style.setProperty('--bgShift', `${y * 0.02}px`);
+      // also translate ::before for extra effect
+      document.body.style.setProperty('--parallax', `${y * 0.03}px`);
+      document.body.querySelectorAll('body::before'); // noop but keeps transform idea
+      document.querySelector('body').style.setProperty('--bp', `${y * 0.02}px`);
+      // Also move the before pseudo by updating transform via inline style on body::before not possible; instead use transform on body::before via style tag is limited.
+      document.querySelector('body').style.backgroundPositionY = `${-y * 0.04}px`;
+    };
+    window.addEventListener('scroll', onScroll, {passive:true});
+    onScroll();
+
+    // Accessibility: focusable pages
+    document.querySelectorAll('.page').forEach((p, idx) => {
+      p.tabIndex = 0;
+      p.addEventListener('keyup', (e) => {
+        if(e.key === 'Enter') window.open(p.querySelector('img')?.src || '', '_blank');
+      });
+    });
+  </script>
+
+  <div style="
+    max-width: 1200px;
+    margin: 0 auto 80px;
+    padding: 0 20px;">
+    
+    <h2 style="
+      font-size: 24px;
+      color: var(--text);
+      margin-bottom: 24px;
+      font-weight: 600;">
+      Mes Vidéos
+    </h2>
+    
+    <div style="
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;">
+      
+      <div style="
+        aspect-ratio: 16/9;
+        background: var(--bg2);
+        border-radius: 12px;
+        overflow: hidden;">
+        <iframe
+          width="100%"
+          height="100%"
+          src="https://www.youtube-nocookie.com/embed/qmzwg46XyAI"
+          title="Design Motion Graphics"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+          style="border: none;">
+        </iframe>
+      </div>
+      
+      <div style="
+        aspect-ratio: 16/9;
+        background: var(--bg2);
+        border-radius: 12px;
+        overflow: hidden;">
+        <iframe
+          width="100%"
+          height="100%"
+          src="https://www.youtube-nocookie.com/embed/pzqCb9PoAjw"
+          title="Animation 3D"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+          style="border: none;">
+        </iframe>
+      </div>
+      
+      <div style="
+        aspect-ratio: 16/9;
+        background: var(--bg2);
+        border-radius: 12px;
+        overflow: hidden;">
+        <iframe
+          width="100%"
+          height="100%"
+          src="https://www.youtube-nocookie.com/embed/5Gg15ty4yNk"
+          title="Motion Design"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+          style="border: none;">
+        </iframe>
+      </div>
+    </div>
+  </div>
+
+  <footer style="
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(180deg, rgba(15,27,74,0.8), rgba(22,37,100,0.9));
+    backdrop-filter: blur(8px);
+    padding: 16px 20px;
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    align-items: center;
+    border-top: 1px solid rgba(255,255,255,0.06);">
+    
+    <a href="https://blondinoffice.com/" target="_blank" rel="noopener" style="
+      color: var(--text);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: transform 0.2s;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2L1 12h3v10h16V12h3L12 2z"/>
+      </svg>
+      Site Web
+    </a>
+    
+    <a href="https://www.linkedin.com/in/ousmane-blondin-diop" target="_blank" rel="noopener" style="
+      color: var(--text);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: transform 0.2s;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+        <rect x="2" y="9" width="4" height="12"/>
+        <circle cx="4" cy="4" r="2"/>
+      </svg>
+      LinkedIn
+    </a>
+    
+    <a href="https://www.instagram.com/blondin_office" target="_blank" rel="noopener" style="
+      color: var(--text);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: transform 0.2s;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="2" y="2" width="20" height="20" rx="5"/>
+        <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/>
+        <path d="M17.5 6.5h.01"/>
+      </svg>
+      Instagram
+    </a>
+  </footer>
+</body>
+</html>
